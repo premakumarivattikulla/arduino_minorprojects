@@ -1,0 +1,22 @@
+# Operating system files
+.DS_Store
+Thumbs.db
+desktop.ini
+# Editor settings
+.vscode/
+.idea/
+# Build output / compiled Arduino files
+build/
+.pio/
+*.hex
+*.elf
+*.bin
+*.map
+*.eep
+# Temporary and backup files
+*.tmp
+*.bak
+*~
+*.swp
+# Local secrets or machine-specific settings
+env.
