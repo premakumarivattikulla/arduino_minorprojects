@@ -1,0 +1,89 @@
+1. Smart Room Temperature Controller
+
+// Smart Room Temperature Controller with Serial Configuration
+// Example for an LM35-style sensor. TMP36 requires a different formula.
+const int tempPin = A0;
+const int heaterLED = 8;
+float setpoint = 25.0;
+void setup() {
+ pinMode(heaterLED, OUTPUT);
+ Serial.begin(9600);
+ Serial.println("Enter target temperature in C:");
+}
+void loop() {
+ if (Serial.available() > 0) {
+ setpoint = Serial.parseFloat();
+ while (Serial.available()) Serial.read();
+ Serial.print("Setpoint: ");
+ Serial.println(setpoint);
+ }
+ int raw = analogRead(tempPin);
+ float voltage = raw * (5.0 / 1023.0);
+ // LM35 produces about 10 mV per degree C.
+ float tempC = voltage * 100.0;
+ bool heating = tempC < setpoint;
+ digitalWrite(heaterLED, heating ? HIGH : LOW);
+ Serial.print("Temperature: ");
+ Serial.print(tempC, 1);
+ Serial.print(" C | Heater: ");
+ Serial.println(heating ? "ON" : "OFF");
+ delay(1000);
+}
+
+
+2. Traffic Light Controller with Pedestrian Request
+
+// Traffic Light Controller with Pedestrian Request
+// Example pin mapping for Arduino Uno.
+const int carR = 2, carY = 3, carG = 4;
+const int pedR = 5, pedG = 6, buttonPin = 7;
+void setLights(bool r, bool y, bool g, bool pr, bool pg) {
+ digitalWrite(carR, r);
+ digitalWrite(carY, y);
+ digitalWrite(carG, g);
+ digitalWrite(pedR, pr);
+ digitalWrite(pedG, pg);
+}
+bool requestPressed() {
+ return digitalRead(buttonPin) == LOW; // INPUT_PULLUP
+}
+void pedestrianPhase();
+void setup() {
+ pinMode(carR, OUTPUT);
+ pinMode(carY, OUTPUT);
+ pinMode(carG, OUTPUT);
+ pinMode(pedR, OUTPUT);
+ pinMode(pedG, OUTPUT);
+ pinMode(buttonPin, INPUT_PULLUP);
+ Serial.begin(9600);
+ setLights(false, false, true, true, false);
+}
+void loop() {
+ Serial.println("Vehicles: GREEN | Pedestrians: RED");
+ unsigned long start = millis();
+ while (millis() - start < 5000) {
+ if (requestPressed()) {
+ delay(30); // simple debounce
+ if (requestPressed()) {
+ pedestrianPhase();
+ return;
+ }
+ }
+ }
+ setLights(false, true, false, true, false);
+ delay(2000);
+ setLights(true, false, false, true, false);
+ delay(3000);
+}
+void pedestrianPhase() {
+ Serial.println("Request accepted");
+ setLights(false, true, false, true, false);
+ delay(2000);
+ setLights(true, false, false, true, false);
+ delay(1000);
+ setLights(true, false, false, false, true);
+ Serial.println("Pedestrians: GREEN");
+ delay(5000); Arduino Minor Projects | EEE, RGUKT Ongole Page 4
+ setLights(true, false, false, true, false);
+ delay(1000);
+}
